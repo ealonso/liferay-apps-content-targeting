@@ -18,54 +18,76 @@ import com.liferay.anonymoususers.model.AnonymousUser;
 import com.liferay.contenttargeting.api.model.BaseRule;
 import com.liferay.contenttargeting.api.model.Rule;
 import com.liferay.contenttargeting.model.RuleInstance;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PrefsPropsUtil;
-import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.User;
+import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil;
+import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.io.Serializable;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Julio Camarero
+ * @author Eudaldo Alonso
  */
 @Component(immediate = true, service = Rule.class)
 public class CustomFieldRule extends BaseRule {
 
 	@Override
 	public boolean evaluate(
-			RuleInstance ruleInstance, AnonymousUser anonymousUser)
+			HttpServletRequest request, RuleInstance ruleInstance,
+			AnonymousUser anonymousUser)
 		throws Exception {
 
-		User user = anonymousUser.getUser();
+		String attributeName = StringPool.BLANK;
+		String value = StringPool.BLANK;
 
-		if (user == null) {
+		try {
+			JSONObject jsonObj = JSONFactoryUtil.createJSONObject(
+				ruleInstance.getTypeSettings());
+
+			attributeName = jsonObj.getString("attributeName");
+			value = jsonObj.getString("value");
+		}
+		catch (JSONException jse) {
+		}
+
+		if (Validator.isNull(attributeName)) {
 			return false;
 		}
 
-		JSONObject jsonObj = JSONFactoryUtil.createJSONObject(
-			ruleInstance.getTypeSettings());
+		ExpandoBridge expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(
+			anonymousUser.getCompanyId(), User.class.getName(),
+			anonymousUser.getUserId());
 
-		int youngerThan = jsonObj.getInt("youngerThan");
-		int olderThan = jsonObj.getInt("olderThan");
+		if (expandoBridge == null) {
+			return false;
+		}
 
-		int age = getAge(user.getBirthday());
+		Serializable attributeValue = expandoBridge.getAttribute(attributeName);
 
-		if ((age > olderThan) && (age < youngerThan)) {
+		if (Validator.isNotNull(attributeValue) &&
+			attributeValue.equals(value)) {
+
 			return true;
 		}
 
@@ -74,39 +96,22 @@ public class CustomFieldRule extends BaseRule {
 
 	@Override
 	public String getIcon() {
-		return "icon-calendar-empty";
+		return "icon-puzzle";
 	}
 
 	@Override
 	public String getSummary(RuleInstance ruleInstance, Locale locale) {
 		String typeSettings = ruleInstance.getTypeSettings();
 
-		String summary = StringPool.BLANK;
-
 		try {
 			JSONObject jsonObj = JSONFactoryUtil.createJSONObject(typeSettings);
 
-			int youngerThan = jsonObj.getInt("youngerThan");
-			int olderThan = jsonObj.getInt("olderThan");
-
-			if ((youngerThan > 0) && (olderThan > 0)) {
-				summary = LanguageUtil.format(
-					locale, "users-between-x-and-x-years-old",
-					new Object[] {olderThan, youngerThan});
-			}
-			else if (youngerThan > 0) {
-				summary = LanguageUtil.format(
-					locale, "users-younger-than-x-years-old", youngerThan);
-			}
-			else if (olderThan > 0) {
-				summary = LanguageUtil.format(
-					locale, "users-older-than-x-years-old", olderThan);
-			}
+			return jsonObj.getString("attributeName");
 		}
 		catch (JSONException jse) {
 		}
 
-		return summary;
+		return StringPool.BLANK;
 	}
 
 	@Override
@@ -114,42 +119,50 @@ public class CustomFieldRule extends BaseRule {
 		PortletRequest request, PortletResponse response, String id,
 		Map<String, String> values) {
 
-		int youngerThan = GetterUtil.getInteger(values.get("youngerThan"));
-		int olderThan = GetterUtil.getInteger(values.get("olderThan"));
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			(ThemeDisplay)request.getAttribute(WebKeys.THEME_DISPLAY);
+
+		String attributeName = values.get("attributeName");
+
+		ExpandoBridge expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(
+			themeDisplay.getCompanyId(), User.class.getName());
+
+		Serializable value = StringPool.BLANK;
+
+		try {
+			Map<String, Serializable> attributes =
+				PortalUtil.getExpandoBridgeAttributes(expandoBridge, request);
+
+			value = attributes.get(attributeName);
+		}
+		catch (Exception e) {
+		}
+
+		ExpandoColumnLocalServiceUtil.addColumn()
 
 		JSONObject jsonObj = JSONFactoryUtil.createJSONObject();
 
-		jsonObj.put("youngerThan", youngerThan);
-		jsonObj.put("olderThan", olderThan);
+		jsonObj.put("attributeName", attributeName);
+		jsonObj.put("value", value.toString());
 
 		return jsonObj.toString();
-	}
-
-	protected int getAge(Date birthday) {
-		Calendar birthdayCalendar = Calendar.getInstance();
-
-		birthdayCalendar.setTime(birthday);
-
-		Calendar today = Calendar.getInstance();
-
-		int age = today.get(Calendar.YEAR) - birthdayCalendar.get(
-			Calendar.YEAR);
-
-		if (today.get(Calendar.DAY_OF_YEAR) <=
-				birthdayCalendar.get(Calendar.DAY_OF_YEAR)) {
-
-			age--;
-		}
-
-		return age;
 	}
 
 	@Override
 	protected void populateContext(
 		RuleInstance ruleInstance, Map<String, Object> context) {
 
-		int youngerThan = 100;
-		int olderThan = 0;
+		Company company = (Company)context.get("company");
+
+		ExpandoBridge expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(
+			company.getCompanyId(), User.class.getName());
+
+		List<String> attributeNames = Collections.list(
+			expandoBridge.getAttributeNames());
+
+		context.put("attributeNames", attributeNames);
+
+		String selectedAttributeName = StringPool.BLANK;
 
 		if (ruleInstance != null) {
 			String typeSettings = ruleInstance.getTypeSettings();
@@ -158,30 +171,19 @@ public class CustomFieldRule extends BaseRule {
 				JSONObject jsonObj = JSONFactoryUtil.createJSONObject(
 					typeSettings);
 
-				youngerThan = jsonObj.getInt("youngerThan");
-				olderThan = jsonObj.getInt("olderThan");
+				selectedAttributeName = jsonObj.getString("attributeName");
 			}
 			catch (JSONException jse) {
 			}
 		}
 
-		context.put("youngerThan", youngerThan);
-		context.put("olderThan", olderThan);
+		if (Validator.isNull(selectedAttributeName) &&
+			!attributeNames.isEmpty()) {
 
-		boolean birthdayEnabled = false;
-
-		Company company = (Company)context.get("company");
-
-		try {
-			birthdayEnabled = PrefsPropsUtil.getBoolean(
-				company.getCompanyId(),
-				PropsKeys.
-					FIELD_ENABLE_COM_LIFERAY_PORTAL_MODEL_CONTACT_BIRTHDAY);
-		}
-		catch (SystemException se) {
+			selectedAttributeName = attributeNames.get(0);
 		}
 
-		context.put("birthdayEnabled", birthdayEnabled);
+		context.put("selectedAttributeName", selectedAttributeName);
 	}
 
 }
