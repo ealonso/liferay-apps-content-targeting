@@ -38,6 +38,8 @@ import java.util.Map;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -48,7 +50,8 @@ public class AgeRule extends BaseRule {
 
 	@Override
 	public boolean evaluate(
-			RuleInstance ruleInstance, AnonymousUser anonymousUser)
+			HttpServletRequest request, RuleInstance ruleInstance,
+			AnonymousUser anonymousUser)
 		throws Exception {
 
 		User user = anonymousUser.getUser();
@@ -70,6 +73,11 @@ public class AgeRule extends BaseRule {
 		}
 
 		return false;
+	}
+
+	@Override
+	public String getCategory() {
+		return "user";
 	}
 
 	@Override
