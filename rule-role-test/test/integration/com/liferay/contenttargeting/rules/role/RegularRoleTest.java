@@ -15,12 +15,23 @@
 package com.liferay.contenttargeting.rules.role;
 
 import com.liferay.analytics.test.util.TestUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.User;
+import com.liferay.anonymoususers.model.AnonymousUser;
+import com.liferay.anonymoususers.service.AnonymousUserLocalService;
+import com.liferay.contenttargeting.model.RuleInstance;
+import com.liferay.contenttargeting.service.RuleInstanceLocalService;
+import com.liferay.osgi.util.service.ServiceTrackerUtil;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.Role;
+import com.liferay.portal.model.RoleConstants;
+import com.liferay.portal.service.RoleLocalServiceUtil;
+import com.liferay.portal.service.ServiceContext;
+
+import java.util.List;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,16 +53,44 @@ public class RegularRoleTest {
 		catch (BundleException e) {
 			e.printStackTrace();
 		}
+
+		_anonymousUserLocalService = ServiceTrackerUtil.getService(
+			AnonymousUserLocalService.class, _bundle.getBundleContext());
+		_ruleInstanceLocalService = ServiceTrackerUtil.getService(
+			RuleInstanceLocalService.class, _bundle.getBundleContext());
 	}
 
 	@Test
 	public void testRule() throws Exception {
-		Group group = TestUtil.addGroup();
+		ServiceContext serviceContext = TestUtil.getServiceContext();
 
-		User user = TestUtil.getUser();
+		AnonymousUser anonymousUser =
+			_anonymousUserLocalService.addAnonymousUser(
+				TestUtil.getUserId(), "127.0.0.1", StringPool.BLANK,
+				serviceContext);
+
+		List<Role> roles = RoleLocalServiceUtil.getRoles(
+			TestUtil.getCompanyId(), new int[] {RoleConstants.TYPE_REGULAR});
+
+		Role role = roles.get(0);
+
+		RegularRoleRule rule = new RegularRoleRule();
+
+		RuleInstance ruleInstance = _ruleInstanceLocalService.addRuleInstance(
+			TestUtil.getUserId(), rule.getRuleKey(), 0,
+			String.valueOf(role.getRoleId()), serviceContext);
+
+		RoleLocalServiceUtil.addUserRole(
+			TestUtil.getUserId(), role.getRoleId());
+
+		Assert.assertTrue(rule.evaluate(null, ruleInstance, anonymousUser));
 	}
+
+	private AnonymousUserLocalService _anonymousUserLocalService;
 
 	@ArquillianResource
 	private Bundle _bundle;
+
+	private RuleInstanceLocalService _ruleInstanceLocalService;
 
 }
