@@ -106,6 +106,14 @@ public class UserSegmentServiceWrapper implements UserSegmentService,
 	}
 
 	@Override
+	public com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _userSegmentService.moveUserSegmentToTrash(userSegmentId);
+	}
+
+	@Override
 	public com.liferay.portal.contenttargeting.model.UserSegment updateUserSegment(
 		long userSegmentId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,

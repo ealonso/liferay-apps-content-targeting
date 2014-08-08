@@ -81,14 +81,26 @@
 				</#if>
 
 				<#if userSegmentPermission.contains(permissionChecker, userSegment, actionKeys.DELETE)>
-					<@portlet["actionURL"] name="deleteUserSegment" var="deleteUserSegmentURL">
-						<@portlet["param"] name="redirect" value="${viewUserSegmentsURL}" />
-						<@portlet["param"] name="userSegmentId" value="${userSegment.getUserSegmentId()?string}" />
-					</@>
+					<#if trashUtil.isTrashEnabled(scopeGroupId)>
+						<@portlet["actionURL"] name="moveUserSegmentToTrash" var="moveUserSegmentToTrashURL">
+							<@portlet["param"] name="redirect" value="${viewUserSegmentsURL}" />
+							<@portlet["param"] name="userSegmentId" value="${userSegment.getUserSegmentId()?string}" />
+						</@>
 
-					<@liferay_ui["icon-delete"]
-						url="${deleteUserSegmentURL}"
-					/>
+						<@liferay_ui["icon-delete"]
+							trash=true
+							url="${moveUserSegmentToTrashURL}"
+						/>
+					<#else>
+						<@portlet["actionURL"] name="deleteUserSegment" var="deleteUserSegmentURL">
+							<@portlet["param"] name="redirect" value="${viewUserSegmentsURL}" />
+							<@portlet["param"] name="userSegmentId" value="${userSegment.getUserSegmentId()?string}" />
+						</@>
+
+						<@liferay_ui["icon-delete"]
+							url="${deleteUserSegmentURL}"
+						/>
+					</#if>
 				</#if>
 
 				<#if userSegmentPermission.contains(permissionChecker, userSegment, actionKeys.PERMISSIONS)>
@@ -130,7 +142,13 @@
 	deleteUserSegments.on(
 		'click',
 		function(event) {
-			if (confirm('${languageUtil.get(locale, "are-you-sure-you-want-to-delete-this")}')) {
+			<#assign message = "are-you-sure-you-want-to-delete-this" />
+
+			<#if trashUtil.isTrashEnabled(scopeGroupId)>
+				<#assign message = "are-you-sure-you-want-to-move-to-trash-this" />
+			</#if>
+
+			if (confirm('${languageUtil.get(locale, message)}')) {
 				document.<@portlet["namespace"] />fmUserSegment.<@portlet["namespace"] />userSegmentIds.value = Liferay.Util.listCheckedExcept(document.<@portlet["namespace"] />fmUserSegment, '<@portlet["namespace"] />allRowIds');
 
 				<@portlet["renderURL"] var="redirectURL">
@@ -138,11 +156,19 @@
 					<@portlet["param"] name="tabs1" value="user-segments" />
 				</@>
 
-				<@portlet["actionURL"] name="deleteUserSegment" var="deleteUserSegmentURL">
-					<@portlet["param"] name="redirect" value="${redirectURL}" />
-				</@>
+				<#if trashUtil.isTrashEnabled(scopeGroupId)>
+					<@portlet["actionURL"] name="moveUserSegmentToTrash" var="moveUserSegmentToTrashURL">
+						<@portlet["param"] name="redirect" value="${redirectURL}" />
+					</@>
 
-				submitForm(document.<@portlet["namespace"] />fmUserSegment, '${deleteUserSegmentURL}');
+					submitForm(document.<@portlet["namespace"] />fmUserSegment, '${moveUserSegmentToTrashURL}');
+				<#else>
+					<@portlet["actionURL"] name="deleteUserSegment" var="deleteUserSegmentURL">
+						<@portlet["param"] name="redirect" value="${redirectURL}" />
+					</@>
+
+					submitForm(document.<@portlet["namespace"] />fmUserSegment, '${deleteUserSegmentURL}');
+				</#if>
 			}
 		}
 	);

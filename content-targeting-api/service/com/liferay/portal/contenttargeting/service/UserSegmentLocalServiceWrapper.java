@@ -580,6 +580,24 @@ public class UserSegmentLocalServiceWrapper implements UserSegmentLocalService,
 	}
 
 	@Override
+	public com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userId, long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _userSegmentLocalService.moveUserSegmentToTrash(userId,
+			userSegmentId);
+	}
+
+	@Override
+	public com.liferay.portal.contenttargeting.model.UserSegment restoreUserSegmentFromTrash(
+		long userId, long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _userSegmentLocalService.restoreUserSegmentFromTrash(userId,
+			userSegmentId);
+	}
+
+	@Override
 	public com.liferay.portal.kernel.search.Hits search(long groupId,
 		java.lang.String keywords, int start, int end)
 		throws com.liferay.portal.kernel.exception.PortalException,

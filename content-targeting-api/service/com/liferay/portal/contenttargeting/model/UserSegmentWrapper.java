@@ -62,6 +62,10 @@ public class UserSegmentWrapper implements UserSegment,
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
+		attributes.put("status", getStatus());
+		attributes.put("statusByUserId", getStatusByUserId());
+		attributes.put("statusByUserName", getStatusByUserName());
+		attributes.put("statusDate", getStatusDate());
 
 		return attributes;
 	}
@@ -132,6 +136,30 @@ public class UserSegmentWrapper implements UserSegment,
 
 		if (description != null) {
 			setDescription(description);
+		}
+
+		Integer status = (Integer)attributes.get("status");
+
+		if (status != null) {
+			setStatus(status);
+		}
+
+		Long statusByUserId = (Long)attributes.get("statusByUserId");
+
+		if (statusByUserId != null) {
+			setStatusByUserId(statusByUserId);
+		}
+
+		String statusByUserName = (String)attributes.get("statusByUserName");
+
+		if (statusByUserName != null) {
+			setStatusByUserName(statusByUserName);
+		}
+
+		Date statusDate = (Date)attributes.get("statusDate");
+
+		if (statusDate != null) {
+			setStatusDate(statusDate);
 		}
 	}
 
@@ -637,6 +665,250 @@ public class UserSegmentWrapper implements UserSegment,
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		java.util.Locale defaultLocale) {
 		_userSegment.setDescriptionMap(descriptionMap, defaultLocale);
+	}
+
+	/**
+	* Returns the status of this user segment.
+	*
+	* @return the status of this user segment
+	*/
+	@Override
+	public int getStatus() {
+		return _userSegment.getStatus();
+	}
+
+	/**
+	* Sets the status of this user segment.
+	*
+	* @param status the status of this user segment
+	*/
+	@Override
+	public void setStatus(int status) {
+		_userSegment.setStatus(status);
+	}
+
+	/**
+	* Returns the status by user ID of this user segment.
+	*
+	* @return the status by user ID of this user segment
+	*/
+	@Override
+	public long getStatusByUserId() {
+		return _userSegment.getStatusByUserId();
+	}
+
+	/**
+	* Sets the status by user ID of this user segment.
+	*
+	* @param statusByUserId the status by user ID of this user segment
+	*/
+	@Override
+	public void setStatusByUserId(long statusByUserId) {
+		_userSegment.setStatusByUserId(statusByUserId);
+	}
+
+	/**
+	* Returns the status by user uuid of this user segment.
+	*
+	* @return the status by user uuid of this user segment
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public java.lang.String getStatusByUserUuid()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _userSegment.getStatusByUserUuid();
+	}
+
+	/**
+	* Sets the status by user uuid of this user segment.
+	*
+	* @param statusByUserUuid the status by user uuid of this user segment
+	*/
+	@Override
+	public void setStatusByUserUuid(java.lang.String statusByUserUuid) {
+		_userSegment.setStatusByUserUuid(statusByUserUuid);
+	}
+
+	/**
+	* Returns the status by user name of this user segment.
+	*
+	* @return the status by user name of this user segment
+	*/
+	@Override
+	public java.lang.String getStatusByUserName() {
+		return _userSegment.getStatusByUserName();
+	}
+
+	/**
+	* Sets the status by user name of this user segment.
+	*
+	* @param statusByUserName the status by user name of this user segment
+	*/
+	@Override
+	public void setStatusByUserName(java.lang.String statusByUserName) {
+		_userSegment.setStatusByUserName(statusByUserName);
+	}
+
+	/**
+	* Returns the status date of this user segment.
+	*
+	* @return the status date of this user segment
+	*/
+	@Override
+	public java.util.Date getStatusDate() {
+		return _userSegment.getStatusDate();
+	}
+
+	/**
+	* Sets the status date of this user segment.
+	*
+	* @param statusDate the status date of this user segment
+	*/
+	@Override
+	public void setStatusDate(java.util.Date statusDate) {
+		_userSegment.setStatusDate(statusDate);
+	}
+
+	/**
+	* Returns the trash entry created when this user segment was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this user segment.
+	*
+	* @return the trash entry created when this user segment was moved to the Recycle Bin
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public com.liferay.portlet.trash.model.TrashEntry getTrashEntry()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _userSegment.getTrashEntry();
+	}
+
+	/**
+	* Returns the class primary key of the trash entry for this user segment.
+	*
+	* @return the class primary key of the trash entry for this user segment
+	*/
+	@Override
+	public long getTrashEntryClassPK() {
+		return _userSegment.getTrashEntryClassPK();
+	}
+
+	/**
+	* Returns the trash handler for this user segment.
+	*
+	* @return the trash handler for this user segment
+	*/
+	@Override
+	public com.liferay.portal.kernel.trash.TrashHandler getTrashHandler() {
+		return _userSegment.getTrashHandler();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is in the Recycle Bin.
+	*
+	* @return <code>true</code> if this user segment is in the Recycle Bin; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInTrash() {
+		return _userSegment.isInTrash();
+	}
+
+	/**
+	* Returns <code>true</code> if the parent of this user segment is in the Recycle Bin.
+	*
+	* @return <code>true</code> if the parent of this user segment is in the Recycle Bin; <code>false</code> otherwise
+	* @throws SystemException if a system exception occurred
+	*/
+	@Override
+	public boolean isInTrashContainer() {
+		return _userSegment.isInTrashContainer();
+	}
+
+	/**
+	* @deprecated As of 6.1.0, replaced by {@link #isApproved()}
+	*/
+	@Override
+	public boolean getApproved() {
+		return _userSegment.getApproved();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is approved.
+	*
+	* @return <code>true</code> if this user segment is approved; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isApproved() {
+		return _userSegment.isApproved();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is denied.
+	*
+	* @return <code>true</code> if this user segment is denied; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isDenied() {
+		return _userSegment.isDenied();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is a draft.
+	*
+	* @return <code>true</code> if this user segment is a draft; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isDraft() {
+		return _userSegment.isDraft();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is expired.
+	*
+	* @return <code>true</code> if this user segment is expired; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isExpired() {
+		return _userSegment.isExpired();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is inactive.
+	*
+	* @return <code>true</code> if this user segment is inactive; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isInactive() {
+		return _userSegment.isInactive();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is incomplete.
+	*
+	* @return <code>true</code> if this user segment is incomplete; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isIncomplete() {
+		return _userSegment.isIncomplete();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is pending.
+	*
+	* @return <code>true</code> if this user segment is pending; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isPending() {
+		return _userSegment.isPending();
+	}
+
+	/**
+	* Returns <code>true</code> if this user segment is scheduled.
+	*
+	* @return <code>true</code> if this user segment is scheduled; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isScheduled() {
+		return _userSegment.isScheduled();
 	}
 
 	@Override

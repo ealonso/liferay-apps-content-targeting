@@ -162,6 +162,20 @@ public class UserSegmentServiceSoap {
 		}
 	}
 
+	public static com.liferay.portal.contenttargeting.model.UserSegmentSoap moveUserSegmentToTrash(
+		long userSegmentId) throws RemoteException {
+		try {
+			com.liferay.portal.contenttargeting.model.UserSegment returnValue = UserSegmentServiceUtil.moveUserSegmentToTrash(userSegmentId);
+
+			return com.liferay.portal.contenttargeting.model.UserSegmentSoap.toSoapModel(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static com.liferay.portal.contenttargeting.model.UserSegmentSoap updateUserSegment(
 		long userSegmentId, java.lang.String[] nameMapLanguageIds,
 		java.lang.String[] nameMapValues,

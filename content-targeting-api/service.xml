@@ -133,7 +133,7 @@
 			<finder-column name="campaignId" />
 		</finder>
 	</entity>
-	<entity name="UserSegment" uuid="true" local-service="true" remote-service="true">
+	<entity name="UserSegment" uuid="true" local-service="true" remote-service="true" trash-enabled="true">
 
 		<!-- PK fields -->
 
@@ -156,6 +156,10 @@
 
 		<column name="name" type="String" localized="true" />
 		<column name="description" type="String" localized="true" />
+		<column name="status" type="int" />
+		<column name="statusByUserId" type="long" />
+		<column name="statusByUserName" type="String" />
+		<column name="statusDate" type="Date" />
 
 		<!-- Relationships -->
 
@@ -172,6 +176,8 @@
 		<finder name="GroupId" return-type="Collection">
 			<finder-column name="groupId" arrayable-operator="OR" />
 		</finder>
+
+		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
 	</entity>
 	<exceptions>
 		<exception>UsedUserSegment</exception>

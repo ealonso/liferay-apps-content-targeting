@@ -99,6 +99,11 @@ public interface UserSegmentService extends BaseService, InvokableService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public com.liferay.portal.contenttargeting.model.UserSegment updateUserSegment(
 		long userSegmentId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,

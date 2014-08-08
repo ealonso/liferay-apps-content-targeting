@@ -42,6 +42,10 @@ public class UserSegmentSoap implements Serializable {
 		soapModel.setModifiedDate(model.getModifiedDate());
 		soapModel.setName(model.getName());
 		soapModel.setDescription(model.getDescription());
+		soapModel.setStatus(model.getStatus());
+		soapModel.setStatusByUserId(model.getStatusByUserId());
+		soapModel.setStatusByUserName(model.getStatusByUserName());
+		soapModel.setStatusDate(model.getStatusDate());
 
 		return soapModel;
 	}
@@ -182,6 +186,38 @@ public class UserSegmentSoap implements Serializable {
 		_description = description;
 	}
 
+	public int getStatus() {
+		return _status;
+	}
+
+	public void setStatus(int status) {
+		_status = status;
+	}
+
+	public long getStatusByUserId() {
+		return _statusByUserId;
+	}
+
+	public void setStatusByUserId(long statusByUserId) {
+		_statusByUserId = statusByUserId;
+	}
+
+	public String getStatusByUserName() {
+		return _statusByUserName;
+	}
+
+	public void setStatusByUserName(String statusByUserName) {
+		_statusByUserName = statusByUserName;
+	}
+
+	public Date getStatusDate() {
+		return _statusDate;
+	}
+
+	public void setStatusDate(Date statusDate) {
+		_statusDate = statusDate;
+	}
+
 	private String _uuid;
 	private long _userSegmentId;
 	private long _groupId;
@@ -193,4 +229,8 @@ public class UserSegmentSoap implements Serializable {
 	private Date _modifiedDate;
 	private String _name;
 	private String _description;
+	private int _status;
+	private long _statusByUserId;
+	private String _statusByUserName;
+	private Date _statusDate;
 }

@@ -37,7 +37,7 @@ public class UserSegmentCacheModel implements CacheModel<UserSegment>,
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(31);
 
 		sb.append("{uuid=");
 		sb.append(uuid);
@@ -61,6 +61,14 @@ public class UserSegmentCacheModel implements CacheModel<UserSegment>,
 		sb.append(name);
 		sb.append(", description=");
 		sb.append(description);
+		sb.append(", status=");
+		sb.append(status);
+		sb.append(", statusByUserId=");
+		sb.append(statusByUserId);
+		sb.append(", statusByUserName=");
+		sb.append(statusByUserName);
+		sb.append(", statusDate=");
+		sb.append(statusDate);
 		sb.append("}");
 
 		return sb.toString();
@@ -118,6 +126,23 @@ public class UserSegmentCacheModel implements CacheModel<UserSegment>,
 			userSegmentImpl.setDescription(description);
 		}
 
+		userSegmentImpl.setStatus(status);
+		userSegmentImpl.setStatusByUserId(statusByUserId);
+
+		if (statusByUserName == null) {
+			userSegmentImpl.setStatusByUserName(StringPool.BLANK);
+		}
+		else {
+			userSegmentImpl.setStatusByUserName(statusByUserName);
+		}
+
+		if (statusDate == Long.MIN_VALUE) {
+			userSegmentImpl.setStatusDate(null);
+		}
+		else {
+			userSegmentImpl.setStatusDate(new Date(statusDate));
+		}
+
 		userSegmentImpl.resetOriginalValues();
 
 		return userSegmentImpl;
@@ -136,6 +161,10 @@ public class UserSegmentCacheModel implements CacheModel<UserSegment>,
 		modifiedDate = objectInput.readLong();
 		name = objectInput.readUTF();
 		description = objectInput.readUTF();
+		status = objectInput.readInt();
+		statusByUserId = objectInput.readLong();
+		statusByUserName = objectInput.readUTF();
+		statusDate = objectInput.readLong();
 	}
 
 	@Override
@@ -177,6 +206,18 @@ public class UserSegmentCacheModel implements CacheModel<UserSegment>,
 		else {
 			objectOutput.writeUTF(description);
 		}
+
+		objectOutput.writeInt(status);
+		objectOutput.writeLong(statusByUserId);
+
+		if (statusByUserName == null) {
+			objectOutput.writeUTF(StringPool.BLANK);
+		}
+		else {
+			objectOutput.writeUTF(statusByUserName);
+		}
+
+		objectOutput.writeLong(statusDate);
 	}
 
 	public String uuid;
@@ -190,4 +231,8 @@ public class UserSegmentCacheModel implements CacheModel<UserSegment>,
 	public long modifiedDate;
 	public String name;
 	public String description;
+	public int status;
+	public long statusByUserId;
+	public String statusByUserName;
+	public long statusDate;
 }

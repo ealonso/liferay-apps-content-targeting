@@ -3157,6 +3157,10 @@ public class UserSegmentPersistenceImpl extends BasePersistenceImpl<UserSegment>
 		userSegmentImpl.setModifiedDate(userSegment.getModifiedDate());
 		userSegmentImpl.setName(userSegment.getName());
 		userSegmentImpl.setDescription(userSegment.getDescription());
+		userSegmentImpl.setStatus(userSegment.getStatus());
+		userSegmentImpl.setStatusByUserId(userSegment.getStatusByUserId());
+		userSegmentImpl.setStatusByUserName(userSegment.getStatusByUserName());
+		userSegmentImpl.setStatusDate(userSegment.getStatusDate());
 
 		return userSegmentImpl;
 	}

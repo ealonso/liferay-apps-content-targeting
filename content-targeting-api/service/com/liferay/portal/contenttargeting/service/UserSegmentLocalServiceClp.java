@@ -239,21 +239,29 @@ public class UserSegmentLocalServiceClp implements UserSegmentLocalService {
 
 		_methodParameterTypes45 = new String[] { "long[][]" };
 
-		_methodName46 = "search";
+		_methodName46 = "moveUserSegmentToTrash";
 
-		_methodParameterTypes46 = new String[] {
-				"long", "java.lang.String", "int", "int"
-			};
+		_methodParameterTypes46 = new String[] { "long", "long" };
 
-		_methodName47 = "searchUserSegments";
+		_methodName47 = "restoreUserSegmentFromTrash";
 
-		_methodParameterTypes47 = new String[] {
-				"long", "java.lang.String", "int", "int"
-			};
+		_methodParameterTypes47 = new String[] { "long", "long" };
 
-		_methodName48 = "updateUserSegment";
+		_methodName48 = "search";
 
 		_methodParameterTypes48 = new String[] {
+				"long", "java.lang.String", "int", "int"
+			};
+
+		_methodName49 = "searchUserSegments";
+
+		_methodParameterTypes49 = new String[] {
+				"long", "java.lang.String", "int", "int"
+			};
+
+		_methodName50 = "updateUserSegment";
+
+		_methodParameterTypes50 = new String[] {
 				"long", "java.util.Map", "java.util.Map",
 				"com.liferay.portal.service.ServiceContext"
 			};
@@ -1674,8 +1682,8 @@ public class UserSegmentLocalServiceClp implements UserSegmentLocalService {
 	}
 
 	@Override
-	public com.liferay.portal.kernel.search.Hits search(long groupId,
-		java.lang.String keywords, int start, int end)
+	public com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userId, long userSegmentId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
@@ -1683,6 +1691,76 @@ public class UserSegmentLocalServiceClp implements UserSegmentLocalService {
 		try {
 			returnObj = _invokableLocalService.invokeMethod(_methodName46,
 					_methodParameterTypes46,
+					new Object[] { userId, userSegmentId });
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.portal.contenttargeting.model.UserSegment)ClpSerializer.translateOutput(returnObj);
+	}
+
+	@Override
+	public com.liferay.portal.contenttargeting.model.UserSegment restoreUserSegmentFromTrash(
+		long userId, long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableLocalService.invokeMethod(_methodName47,
+					_methodParameterTypes47,
+					new Object[] { userId, userSegmentId });
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.portal.contenttargeting.model.UserSegment)ClpSerializer.translateOutput(returnObj);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		java.lang.String keywords, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableLocalService.invokeMethod(_methodName48,
+					_methodParameterTypes48,
 					new Object[] {
 						groupId,
 						
@@ -1724,8 +1802,8 @@ public class UserSegmentLocalServiceClp implements UserSegmentLocalService {
 		Object returnObj = null;
 
 		try {
-			returnObj = _invokableLocalService.invokeMethod(_methodName47,
-					_methodParameterTypes47,
+			returnObj = _invokableLocalService.invokeMethod(_methodName49,
+					_methodParameterTypes49,
 					new Object[] {
 						groupId,
 						
@@ -1770,8 +1848,8 @@ public class UserSegmentLocalServiceClp implements UserSegmentLocalService {
 		Object returnObj = null;
 
 		try {
-			returnObj = _invokableLocalService.invokeMethod(_methodName48,
-					_methodParameterTypes48,
+			returnObj = _invokableLocalService.invokeMethod(_methodName50,
+					_methodParameterTypes50,
 					new Object[] {
 						userSegmentId,
 						
@@ -1902,4 +1980,8 @@ public class UserSegmentLocalServiceClp implements UserSegmentLocalService {
 	private String[] _methodParameterTypes47;
 	private String _methodName48;
 	private String[] _methodParameterTypes48;
+	private String _methodName49;
+	private String[] _methodParameterTypes49;
+	private String _methodName50;
+	private String[] _methodParameterTypes50;
 }

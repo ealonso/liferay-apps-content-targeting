@@ -32,6 +32,14 @@
 	</#if>
 
 	<#if contentTargetingPermission.contains(permissionChecker, scopeGroupId, actionKeys.DELETE_USER_SEGMENT)>
-		<@aui["nav-item"] cssClass="hide" id="deleteUserSegments" iconCssClass="icon-remove" label="delete" />
+		<#assign iconCssClass = "icon-remove" />
+		<#assign label = "delete" />
+
+		<#if trashUtil.isTrashEnabled(scopeGroupId)>
+			<#assign iconCssClass = "icon-trash" />
+			<#assign label = "move-to-the-recycle-bin" />
+		</#if>
+
+		<@aui["nav-item"] cssClass="hide" id="deleteUserSegments" iconCssClass="${iconCssClass}" label="${label}" />
 	</#if>
 </@>

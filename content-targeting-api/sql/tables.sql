@@ -65,5 +65,9 @@ create table ContentTargeting_UserSegment (
 	createDate DATE null,
 	modifiedDate DATE null,
 	name STRING null,
-	description STRING null
+	description STRING null,
+	status INTEGER,
+	statusByUserId LONG,
+	statusByUserName VARCHAR(75) null,
+	statusDate DATE null
 );

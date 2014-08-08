@@ -97,6 +97,17 @@ public class UserSegmentServiceImpl extends UserSegmentServiceBaseImpl {
 	}
 
 	@Override
+	public UserSegment moveUserSegmentToTrash(long userSegmentId)
+		throws PortalException, SystemException {
+
+		UserSegmentPermission.check(
+			getPermissionChecker(), userSegmentId, ActionKeys.DELETE);
+
+		return userSegmentLocalService.moveUserSegmentToTrash(
+			getUserId(), userSegmentId);
+	}
+
+	@Override
 	public UserSegment updateUserSegment(
 			long userSegmentId, Map<Locale, String> nameMap,
 			Map<Locale, String> descriptionMap, ServiceContext serviceContext)

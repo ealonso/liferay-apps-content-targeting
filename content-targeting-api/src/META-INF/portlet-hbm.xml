@@ -77,5 +77,9 @@
 		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+		<property name="statusByUserId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="statusByUserName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="statusDate" type="org.hibernate.type.TimestampType" />
 	</class>
 </hibernate-mapping>

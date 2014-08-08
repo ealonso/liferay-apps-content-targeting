@@ -16,13 +16,18 @@ package com.liferay.portal.contenttargeting.model;
 
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.AutoEscape;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.StagedGroupedModel;
+import com.liferay.portal.model.TrashedModel;
+import com.liferay.portal.model.WorkflowedModel;
 import com.liferay.portal.service.ServiceContext;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portlet.trash.model.TrashEntry;
 
 import java.io.Serializable;
 
@@ -44,7 +49,7 @@ import java.util.Map;
  * @generated
  */
 public interface UserSegmentModel extends BaseModel<UserSegment>,
-	StagedGroupedModel {
+	StagedGroupedModel, TrashedModel, WorkflowedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -423,6 +428,200 @@ public interface UserSegmentModel extends BaseModel<UserSegment>,
 	 */
 	public void setDescriptionMap(Map<Locale, String> descriptionMap,
 		Locale defaultLocale);
+
+	/**
+	 * Returns the status of this user segment.
+	 *
+	 * @return the status of this user segment
+	 */
+	@Override
+	public int getStatus();
+
+	/**
+	 * Sets the status of this user segment.
+	 *
+	 * @param status the status of this user segment
+	 */
+	@Override
+	public void setStatus(int status);
+
+	/**
+	 * Returns the status by user ID of this user segment.
+	 *
+	 * @return the status by user ID of this user segment
+	 */
+	@Override
+	public long getStatusByUserId();
+
+	/**
+	 * Sets the status by user ID of this user segment.
+	 *
+	 * @param statusByUserId the status by user ID of this user segment
+	 */
+	@Override
+	public void setStatusByUserId(long statusByUserId);
+
+	/**
+	 * Returns the status by user uuid of this user segment.
+	 *
+	 * @return the status by user uuid of this user segment
+	 * @throws SystemException if a system exception occurred
+	 */
+	@Override
+	public String getStatusByUserUuid() throws SystemException;
+
+	/**
+	 * Sets the status by user uuid of this user segment.
+	 *
+	 * @param statusByUserUuid the status by user uuid of this user segment
+	 */
+	@Override
+	public void setStatusByUserUuid(String statusByUserUuid);
+
+	/**
+	 * Returns the status by user name of this user segment.
+	 *
+	 * @return the status by user name of this user segment
+	 */
+	@AutoEscape
+	@Override
+	public String getStatusByUserName();
+
+	/**
+	 * Sets the status by user name of this user segment.
+	 *
+	 * @param statusByUserName the status by user name of this user segment
+	 */
+	@Override
+	public void setStatusByUserName(String statusByUserName);
+
+	/**
+	 * Returns the status date of this user segment.
+	 *
+	 * @return the status date of this user segment
+	 */
+	@Override
+	public Date getStatusDate();
+
+	/**
+	 * Sets the status date of this user segment.
+	 *
+	 * @param statusDate the status date of this user segment
+	 */
+	@Override
+	public void setStatusDate(Date statusDate);
+
+	/**
+	 * Returns the trash entry created when this user segment was moved to the Recycle Bin. The trash entry may belong to one of the ancestors of this user segment.
+	 *
+	 * @return the trash entry created when this user segment was moved to the Recycle Bin
+	 * @throws SystemException if a system exception occurred
+	 */
+	@Override
+	public TrashEntry getTrashEntry() throws PortalException, SystemException;
+
+	/**
+	 * Returns the class primary key of the trash entry for this user segment.
+	 *
+	 * @return the class primary key of the trash entry for this user segment
+	 */
+	@Override
+	public long getTrashEntryClassPK();
+
+	/**
+	 * Returns the trash handler for this user segment.
+	 *
+	 * @return the trash handler for this user segment
+	 */
+	@Override
+	public TrashHandler getTrashHandler();
+
+	/**
+	 * Returns <code>true</code> if this user segment is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if this user segment is in the Recycle Bin; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInTrash();
+
+	/**
+	 * Returns <code>true</code> if the parent of this user segment is in the Recycle Bin.
+	 *
+	 * @return <code>true</code> if the parent of this user segment is in the Recycle Bin; <code>false</code> otherwise
+	 * @throws SystemException if a system exception occurred
+	 */
+	@Override
+	public boolean isInTrashContainer();
+
+	/**
+	 * @deprecated As of 6.1.0, replaced by {@link #isApproved()}
+	 */
+	@Override
+	public boolean getApproved();
+
+	/**
+	 * Returns <code>true</code> if this user segment is approved.
+	 *
+	 * @return <code>true</code> if this user segment is approved; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isApproved();
+
+	/**
+	 * Returns <code>true</code> if this user segment is denied.
+	 *
+	 * @return <code>true</code> if this user segment is denied; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isDenied();
+
+	/**
+	 * Returns <code>true</code> if this user segment is a draft.
+	 *
+	 * @return <code>true</code> if this user segment is a draft; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isDraft();
+
+	/**
+	 * Returns <code>true</code> if this user segment is expired.
+	 *
+	 * @return <code>true</code> if this user segment is expired; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isExpired();
+
+	/**
+	 * Returns <code>true</code> if this user segment is inactive.
+	 *
+	 * @return <code>true</code> if this user segment is inactive; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInactive();
+
+	/**
+	 * Returns <code>true</code> if this user segment is incomplete.
+	 *
+	 * @return <code>true</code> if this user segment is incomplete; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isIncomplete();
+
+	/**
+	 * Returns <code>true</code> if this user segment is pending.
+	 *
+	 * @return <code>true</code> if this user segment is pending; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isPending();
+
+	/**
+	 * Returns <code>true</code> if this user segment is scheduled.
+	 *
+	 * @return <code>true</code> if this user segment is scheduled; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isScheduled();
 
 	@Override
 	public boolean isNew();

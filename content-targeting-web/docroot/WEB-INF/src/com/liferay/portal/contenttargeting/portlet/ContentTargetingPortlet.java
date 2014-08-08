@@ -64,6 +64,7 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import freemarker.ext.beans.BeansWrapper;
 
@@ -200,6 +201,50 @@ public class ContentTargetingPortlet extends CTFreeMarkerPortlet {
 			UserSegmentLocalService.class, bundle.getBundleContext());
 		_userSegmentService = ServiceTrackerUtil.getService(
 			UserSegmentService.class, bundle.getBundleContext());
+	}
+
+	public void moveUserSegmentToTrash(
+			ActionRequest request, ActionResponse response)
+		throws Exception {
+
+		try {
+			long[] moveUserSegmentToTrashIds = null;
+
+			long userSegmentId = ParamUtil.getLong(request, "userSegmentId");
+
+			if (userSegmentId > 0) {
+				moveUserSegmentToTrashIds = new long[] {userSegmentId};
+			}
+			else {
+				moveUserSegmentToTrashIds = StringUtil.split(
+					ParamUtil.getString(request, "userSegmentIds"), 0L);
+			}
+
+			for (long moveUserSegmentToTrashId : moveUserSegmentToTrashIds) {
+				_userSegmentService.moveUserSegmentToTrash(
+					moveUserSegmentToTrashId);
+			}
+
+			sendRedirect(request, response);
+		}
+		catch (Exception e) {
+			SessionErrors.add(request, e.getClass().getName(), e);
+
+			if (e instanceof UsedUserSegmentException) {
+				SessionMessages.add(
+					request,
+					PortalUtil.getPortletId(request) +
+						SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
+
+				response.setRenderParameter(
+					"mvcPath", ContentTargetingPath.VIEW);
+				response.setRenderParameter("tabs1", "user-segments");
+			}
+			else {
+				response.setRenderParameter(
+					"mvcPath", ContentTargetingPath.ERROR);
+			}
+		}
 	}
 
 	public void updateCampaign(ActionRequest request, ActionResponse response)
@@ -377,6 +422,7 @@ public class ContentTargetingPortlet extends CTFreeMarkerPortlet {
 		template.put(
 			"tabs1",
 			ParamUtil.getString(portletRequest, "tabs1", "user-segments"));
+		template.put("trashUtil", TrashUtil.getTrash());
 		template.put(
 			"userInfo", portletRequest.getAttribute(PortletRequest.USER_INFO));
 		template.put("userSegmentClass", UserSegment.class);

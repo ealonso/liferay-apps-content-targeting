@@ -459,6 +459,16 @@ public interface UserSegmentLocalService extends BaseLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userId, long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	public com.liferay.portal.contenttargeting.model.UserSegment restoreUserSegmentFromTrash(
+		long userId, long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.portal.kernel.search.Hits search(long groupId,
 		java.lang.String keywords, int start, int end)

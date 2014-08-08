@@ -107,6 +107,13 @@ public class UserSegmentServiceUtil {
 		return getService().getUserSegmentsCount(groupIds);
 	}
 
+	public static com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().moveUserSegmentToTrash(userSegmentId);
+	}
+
 	public static com.liferay.portal.contenttargeting.model.UserSegment updateUserSegment(
 		long userSegmentId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,

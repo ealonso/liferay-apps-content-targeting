@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.GroupLocalServiceUtil;
@@ -44,6 +45,7 @@ import com.liferay.portlet.asset.model.AssetCategory;
 import com.liferay.portlet.asset.model.AssetCategoryConstants;
 import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
+import com.liferay.portlet.trash.model.TrashEntry;
 
 import java.util.Date;
 import java.util.List;
@@ -97,6 +99,10 @@ public class UserSegmentLocalServiceImpl
 		userSegment.setModifiedDate(serviceContext.getModifiedDate(now));
 		userSegment.setNameMap(nameMap);
 		userSegment.setDescriptionMap(descriptionMap);
+		userSegment.setStatus(WorkflowConstants.STATUS_APPROVED);
+		userSegment.setStatusByUserId(user.getUserId());
+		userSegment.setStatusByUserName(user.getFullName());
+		userSegment.setStatusDate(serviceContext.getCreateDate(now));
 
 		userSegmentPersistence.update(userSegment);
 
@@ -180,6 +186,58 @@ public class UserSegmentLocalServiceImpl
 		throws PortalException, SystemException {
 
 		return userSegmentPersistence.countByGroupId(groupIds);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public UserSegment moveUserSegmentToTrash(long userId, long userSegmentId)
+		throws PortalException, SystemException {
+
+		User user = UserLocalServiceUtil.getUser(userId);
+
+		UserSegment userSegment = userSegmentPersistence.fetchByPrimaryKey(
+			userSegmentId);
+
+		int oldStatus = userSegment.getStatus();
+
+		userSegment.setStatus(WorkflowConstants.STATUS_IN_TRASH);
+		userSegment.setStatusByUserId(userId);
+		userSegment.setStatusByUserName(user.getFullName());
+		userSegment.setStatusDate(new Date());
+
+		userSegmentPersistence.update(userSegment);
+
+		trashEntryLocalService.addTrashEntry(
+			userId, userSegment.getGroupId(), UserSegment.class.getName(),
+			userSegment.getUserSegmentId(), userSegment.getUuid(), null,
+			oldStatus, null, null);
+
+		return userSegment;
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public UserSegment restoreUserSegmentFromTrash(
+			long userId, long userSegmentId)
+		throws PortalException, SystemException {
+
+		User user = UserLocalServiceUtil.getUser(userId);
+
+		TrashEntry trashEntry = trashEntryLocalService.getEntry(
+			UserSegment.class.getName(), userSegmentId);
+
+		UserSegment userSegment = userSegmentPersistence.fetchByPrimaryKey(
+			userSegmentId);
+
+		userSegment.setStatus(trashEntry.getStatus());
+		userSegment.setStatusByUserId(userId);
+		userSegment.setStatusByUserName(user.getFullName());
+		userSegment.setStatusDate(new Date());
+
+		trashEntryLocalService.deleteEntry(
+			UserSegment.class.getName(), userSegmentId);
+
+		return userSegment;
 	}
 
 	@Override

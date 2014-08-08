@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 6.1.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_6_1_0.dtd">
+<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 6.2.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_6_2_0.dtd">
 
 <liferay-portlet-app>
 	<portlet>
@@ -17,6 +17,7 @@
 		<icon>/icons/icon.png</icon>
 		<control-panel-entry-category>site_administration.configuration</control-panel-entry-category>
 		<control-panel-entry-weight>10.0</control-panel-entry-weight>
+		<trash-handler>com.liferay.portal.contenttargeting.portlet.trash.UserSegmentTrashHandler</trash-handler>
 		<render-weight>1</render-weight>
 		<header-portlet-css>/css/content_targeting/main.css</header-portlet-css>
 		<header-portlet-css>/css/content_targeting/rules_panel.css</header-portlet-css>

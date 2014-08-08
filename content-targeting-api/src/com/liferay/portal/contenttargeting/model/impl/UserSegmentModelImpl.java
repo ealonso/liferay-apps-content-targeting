@@ -19,9 +19,12 @@ import com.liferay.portal.contenttargeting.model.UserSegment;
 import com.liferay.portal.contenttargeting.model.UserSegmentModel;
 import com.liferay.portal.contenttargeting.model.UserSegmentSoap;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.lar.StagedModelType;
+import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -29,13 +32,18 @@ import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.model.ContainerModel;
+import com.liferay.portal.model.TrashedModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
 
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
+import com.liferay.portlet.trash.model.TrashEntry;
+import com.liferay.portlet.trash.service.TrashEntryLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -83,9 +91,13 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 			{ "createDate", Types.TIMESTAMP },
 			{ "modifiedDate", Types.TIMESTAMP },
 			{ "name", Types.VARCHAR },
-			{ "description", Types.VARCHAR }
+			{ "description", Types.VARCHAR },
+			{ "status", Types.INTEGER },
+			{ "statusByUserId", Types.BIGINT },
+			{ "statusByUserName", Types.VARCHAR },
+			{ "statusDate", Types.TIMESTAMP }
 		};
-	public static final String TABLE_SQL_CREATE = "create table ContentTargeting_UserSegment (uuid_ VARCHAR(75) null,userSegmentId LONG not null primary key,groupId LONG,assetCategoryId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name STRING null,description STRING null)";
+	public static final String TABLE_SQL_CREATE = "create table ContentTargeting_UserSegment (uuid_ VARCHAR(75) null,userSegmentId LONG not null primary key,groupId LONG,assetCategoryId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name STRING null,description STRING null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table ContentTargeting_UserSegment";
 	public static final String ORDER_BY_JPQL = " ORDER BY userSegment.name DESC";
 	public static final String ORDER_BY_SQL = " ORDER BY ContentTargeting_UserSegment.name DESC";
@@ -130,6 +142,10 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 		model.setModifiedDate(soapModel.getModifiedDate());
 		model.setName(soapModel.getName());
 		model.setDescription(soapModel.getDescription());
+		model.setStatus(soapModel.getStatus());
+		model.setStatusByUserId(soapModel.getStatusByUserId());
+		model.setStatusByUserName(soapModel.getStatusByUserName());
+		model.setStatusDate(soapModel.getStatusDate());
 
 		return model;
 	}
@@ -218,6 +234,10 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
+		attributes.put("status", getStatus());
+		attributes.put("statusByUserId", getStatusByUserId());
+		attributes.put("statusByUserName", getStatusByUserName());
+		attributes.put("statusDate", getStatusDate());
 
 		return attributes;
 	}
@@ -288,6 +308,30 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 
 		if (description != null) {
 			setDescription(description);
+		}
+
+		Integer status = (Integer)attributes.get("status");
+
+		if (status != null) {
+			setStatus(status);
+		}
+
+		Long statusByUserId = (Long)attributes.get("statusByUserId");
+
+		if (statusByUserId != null) {
+			setStatusByUserId(statusByUserId);
+		}
+
+		String statusByUserName = (String)attributes.get("statusByUserName");
+
+		if (statusByUserName != null) {
+			setStatusByUserName(statusByUserName);
+		}
+
+		Date statusDate = (Date)attributes.get("statusDate");
+
+		if (statusDate != null) {
+			setStatusDate(statusDate);
 		}
 	}
 
@@ -646,10 +690,242 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 				LocaleUtil.toLanguageId(defaultLocale)));
 	}
 
+	@JSON
+	@Override
+	public int getStatus() {
+		return _status;
+	}
+
+	@Override
+	public void setStatus(int status) {
+		_status = status;
+	}
+
+	@JSON
+	@Override
+	public long getStatusByUserId() {
+		return _statusByUserId;
+	}
+
+	@Override
+	public void setStatusByUserId(long statusByUserId) {
+		_statusByUserId = statusByUserId;
+	}
+
+	@Override
+	public String getStatusByUserUuid() throws SystemException {
+		return PortalUtil.getUserValue(getStatusByUserId(), "uuid",
+			_statusByUserUuid);
+	}
+
+	@Override
+	public void setStatusByUserUuid(String statusByUserUuid) {
+		_statusByUserUuid = statusByUserUuid;
+	}
+
+	@JSON
+	@Override
+	public String getStatusByUserName() {
+		if (_statusByUserName == null) {
+			return StringPool.BLANK;
+		}
+		else {
+			return _statusByUserName;
+		}
+	}
+
+	@Override
+	public void setStatusByUserName(String statusByUserName) {
+		_statusByUserName = statusByUserName;
+	}
+
+	@JSON
+	@Override
+	public Date getStatusDate() {
+		return _statusDate;
+	}
+
+	@Override
+	public void setStatusDate(Date statusDate) {
+		_statusDate = statusDate;
+	}
+
 	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(PortalUtil.getClassNameId(
 				UserSegment.class.getName()));
+	}
+
+	@Override
+	public TrashEntry getTrashEntry() throws PortalException, SystemException {
+		if (!isInTrash()) {
+			return null;
+		}
+
+		TrashEntry trashEntry = TrashEntryLocalServiceUtil.fetchEntry(getModelClassName(),
+				getTrashEntryClassPK());
+
+		if (trashEntry != null) {
+			return trashEntry;
+		}
+
+		TrashHandler trashHandler = getTrashHandler();
+
+		if (!Validator.isNull(trashHandler.getContainerModelClassName())) {
+			ContainerModel containerModel = trashHandler.getParentContainerModel(this);
+
+			while (containerModel != null) {
+				if (containerModel instanceof TrashedModel) {
+					TrashedModel trashedModel = (TrashedModel)containerModel;
+
+					return trashedModel.getTrashEntry();
+				}
+
+				trashHandler = TrashHandlerRegistryUtil.getTrashHandler(trashHandler.getContainerModelClassName());
+
+				if (trashHandler == null) {
+					return null;
+				}
+
+				containerModel = trashHandler.getContainerModel(containerModel.getParentContainerModelId());
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public long getTrashEntryClassPK() {
+		return getPrimaryKey();
+	}
+
+	@Override
+	public TrashHandler getTrashHandler() {
+		return TrashHandlerRegistryUtil.getTrashHandler(getModelClassName());
+	}
+
+	@Override
+	public boolean isInTrash() {
+		if (getStatus() == WorkflowConstants.STATUS_IN_TRASH) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isInTrashContainer() {
+		TrashHandler trashHandler = getTrashHandler();
+
+		if ((trashHandler == null) ||
+				Validator.isNull(trashHandler.getContainerModelClassName())) {
+			return false;
+		}
+
+		try {
+			ContainerModel containerModel = trashHandler.getParentContainerModel(this);
+
+			if (containerModel == null) {
+				return false;
+			}
+
+			if (containerModel instanceof TrashedModel) {
+				return ((TrashedModel)containerModel).isInTrash();
+			}
+		}
+		catch (Exception e) {
+		}
+
+		return false;
+	}
+
+	/**
+	 * @deprecated As of 6.1.0, replaced by {@link #isApproved}
+	 */
+	@Override
+	public boolean getApproved() {
+		return isApproved();
+	}
+
+	@Override
+	public boolean isApproved() {
+		if (getStatus() == WorkflowConstants.STATUS_APPROVED) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isDenied() {
+		if (getStatus() == WorkflowConstants.STATUS_DENIED) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isDraft() {
+		if (getStatus() == WorkflowConstants.STATUS_DRAFT) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isExpired() {
+		if (getStatus() == WorkflowConstants.STATUS_EXPIRED) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isInactive() {
+		if (getStatus() == WorkflowConstants.STATUS_INACTIVE) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isIncomplete() {
+		if (getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isPending() {
+		if (getStatus() == WorkflowConstants.STATUS_PENDING) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isScheduled() {
+		if (getStatus() == WorkflowConstants.STATUS_SCHEDULED) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	public long getColumnBitmask() {
@@ -767,6 +1043,10 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 		userSegmentImpl.setModifiedDate(getModifiedDate());
 		userSegmentImpl.setName(getName());
 		userSegmentImpl.setDescription(getDescription());
+		userSegmentImpl.setStatus(getStatus());
+		userSegmentImpl.setStatusByUserId(getStatusByUserId());
+		userSegmentImpl.setStatusByUserName(getStatusByUserName());
+		userSegmentImpl.setStatusDate(getStatusDate());
 
 		userSegmentImpl.resetOriginalValues();
 
@@ -896,12 +1176,33 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 			userSegmentCacheModel.description = null;
 		}
 
+		userSegmentCacheModel.status = getStatus();
+
+		userSegmentCacheModel.statusByUserId = getStatusByUserId();
+
+		userSegmentCacheModel.statusByUserName = getStatusByUserName();
+
+		String statusByUserName = userSegmentCacheModel.statusByUserName;
+
+		if ((statusByUserName != null) && (statusByUserName.length() == 0)) {
+			userSegmentCacheModel.statusByUserName = null;
+		}
+
+		Date statusDate = getStatusDate();
+
+		if (statusDate != null) {
+			userSegmentCacheModel.statusDate = statusDate.getTime();
+		}
+		else {
+			userSegmentCacheModel.statusDate = Long.MIN_VALUE;
+		}
+
 		return userSegmentCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(31);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -925,6 +1226,14 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 		sb.append(getName());
 		sb.append(", description=");
 		sb.append(getDescription());
+		sb.append(", status=");
+		sb.append(getStatus());
+		sb.append(", statusByUserId=");
+		sb.append(getStatusByUserId());
+		sb.append(", statusByUserName=");
+		sb.append(getStatusByUserName());
+		sb.append(", statusDate=");
+		sb.append(getStatusDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -932,7 +1241,7 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(37);
+		StringBundler sb = new StringBundler(49);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.contenttargeting.model.UserSegment");
@@ -982,6 +1291,22 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 			"<column><column-name>description</column-name><column-value><![CDATA[");
 		sb.append(getDescription());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>status</column-name><column-value><![CDATA[");
+		sb.append(getStatus());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>statusByUserId</column-name><column-value><![CDATA[");
+		sb.append(getStatusByUserId());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>statusByUserName</column-name><column-value><![CDATA[");
+		sb.append(getStatusByUserName());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>statusDate</column-name><column-value><![CDATA[");
+		sb.append(getStatusDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -1011,6 +1336,11 @@ public class UserSegmentModelImpl extends BaseModelImpl<UserSegment>
 	private String _nameCurrentLanguageId;
 	private String _description;
 	private String _descriptionCurrentLanguageId;
+	private int _status;
+	private long _statusByUserId;
+	private String _statusByUserUuid;
+	private String _statusByUserName;
+	private Date _statusDate;
 	private long _columnBitmask;
 	private UserSegment _escapedModel;
 }

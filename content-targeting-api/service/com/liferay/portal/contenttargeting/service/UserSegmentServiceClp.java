@@ -59,9 +59,13 @@ public class UserSegmentServiceClp implements UserSegmentService {
 
 		_methodParameterTypes8 = new String[] { "long[][]" };
 
-		_methodName9 = "updateUserSegment";
+		_methodName9 = "moveUserSegmentToTrash";
 
-		_methodParameterTypes9 = new String[] {
+		_methodParameterTypes9 = new String[] { "long" };
+
+		_methodName10 = "updateUserSegment";
+
+		_methodParameterTypes10 = new String[] {
 				"long", "java.util.Map", "java.util.Map",
 				"com.liferay.portal.service.ServiceContext"
 			};
@@ -333,6 +337,40 @@ public class UserSegmentServiceClp implements UserSegmentService {
 	}
 
 	@Override
+	public com.liferay.portal.contenttargeting.model.UserSegment moveUserSegmentToTrash(
+		long userSegmentId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableService.invokeMethod(_methodName9,
+					_methodParameterTypes9, new Object[] { userSegmentId });
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.portal.contenttargeting.model.UserSegment)ClpSerializer.translateOutput(returnObj);
+	}
+
+	@Override
 	public com.liferay.portal.contenttargeting.model.UserSegment updateUserSegment(
 		long userSegmentId,
 		java.util.Map<java.util.Locale, java.lang.String> nameMap,
@@ -343,8 +381,8 @@ public class UserSegmentServiceClp implements UserSegmentService {
 		Object returnObj = null;
 
 		try {
-			returnObj = _invokableService.invokeMethod(_methodName9,
-					_methodParameterTypes9,
+			returnObj = _invokableService.invokeMethod(_methodName10,
+					_methodParameterTypes10,
 					new Object[] {
 						userSegmentId,
 						
@@ -397,4 +435,6 @@ public class UserSegmentServiceClp implements UserSegmentService {
 	private String[] _methodParameterTypes8;
 	private String _methodName9;
 	private String[] _methodParameterTypes9;
+	private String _methodName10;
+	private String[] _methodParameterTypes10;
 }
