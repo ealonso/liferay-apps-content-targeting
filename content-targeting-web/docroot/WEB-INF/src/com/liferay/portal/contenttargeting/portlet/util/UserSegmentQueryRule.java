@@ -71,14 +71,14 @@ public class UserSegmentQueryRule {
 		if (_contains) {
 			if (_andOperator) {
 				return ArrayUtil.containsAll(
-					_userSegmentAssetCategoryIds, userSegmentAssetCategoryIds);
+					userSegmentAssetCategoryIds, _userSegmentAssetCategoryIds);
 			}
 			else {
 				for (long userSegmentAssetCategoryId :
-						userSegmentAssetCategoryIds) {
+						_userSegmentAssetCategoryIds) {
 
 					if (ArrayUtil.contains(
-							_userSegmentAssetCategoryIds,
+							userSegmentAssetCategoryIds,
 							userSegmentAssetCategoryId)) {
 
 						return true;
@@ -91,10 +91,10 @@ public class UserSegmentQueryRule {
 		else {
 			if (_andOperator) {
 				for (long userSegmentAssetCategoryId :
-						userSegmentAssetCategoryIds) {
+						_userSegmentAssetCategoryIds) {
 
 					if (ArrayUtil.contains(
-							_userSegmentAssetCategoryIds,
+							userSegmentAssetCategoryIds,
 							userSegmentAssetCategoryId)) {
 
 						return false;
@@ -105,10 +105,10 @@ public class UserSegmentQueryRule {
 			}
 			else {
 				for (long userSegmentAssetCategoryId :
-						userSegmentAssetCategoryIds) {
+						_userSegmentAssetCategoryIds) {
 
 					if (!ArrayUtil.contains(
-							_userSegmentAssetCategoryIds,
+							userSegmentAssetCategoryIds,
 							userSegmentAssetCategoryId)) {
 
 						return true;
