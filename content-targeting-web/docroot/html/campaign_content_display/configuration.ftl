@@ -45,7 +45,7 @@
 			</@>
 		</div>
 
-		<div class="lfr-form-row last">
+		<div class="last lfr-form-row">
 			<div class="row-fields">
 				<div class="default-content">
 					<div class="full-view hide">
@@ -78,7 +78,7 @@
 
 									<@aui["input"] name="assetEntryIdDefault" type="hidden" value=assetEntryIdDefault />
 
-									<div class="lfr-meta-actions edit-controls">
+									<div class="edit-controls lfr-meta-actions">
 										<@liferay_ui["icon-menu"] cssClass="select-existing-selector" direction="right" icon="${themeDisplay.getPathThemeImages()}/common/add.png" message=languageUtil.get(locale, "select-content") showWhenSingleIcon=true>
 											<#list assetRendererFactories as assetRendererFactory>
 												<@liferay_ui["icon"]

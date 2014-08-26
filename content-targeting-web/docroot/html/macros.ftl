@@ -106,13 +106,13 @@
 			<#if selectedIndex != queryRule_index>
 				<#assign assetEntry = queryRule.getAssetEntry() />
 
-				<div class="hide full-content" id="<@portlet["namespace"] />FullContent${queryRule_index}">
+				<div class="full-content hide" id="<@portlet["namespace"] />FullContent${queryRule_index}">
 					<@renderAssetEntry assetEntry=assetEntry />
 				</div>
 			</#if>
 		</#list>
 
-		<div class="lfr-meta-actions content-preview-container" id="<@portlet["namespace"] />contentPreviewContainer">
+		<div class="content-preview-container lfr-meta-actions" id="<@portlet["namespace"] />contentPreviewContainer">
 			<#list queryRules as queryRule>
 				<#assign assetEntry = queryRule.getAssetEntry() />
 

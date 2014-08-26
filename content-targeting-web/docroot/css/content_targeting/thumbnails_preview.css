@@ -2,16 +2,16 @@
 
 .user-segment-content-display-portlet, .campaign-content-display-portlet {
 	&:hover .content-container {
-	   overflow: visible;
+		overflow: visible;
 
-	 	.content-preview-container {
-	 	    @include opacity(1);
+		.content-preview-container {
+			@include opacity(1);
 
-	 		.content-preview .query-rule-summary {
-				width: 200px;
+			.content-preview .query-rule-summary {
 				font-size: inherit;
-	 		}
-	 	}
+				width: 200px;
+			}
+		}
 	}
 
 	.content-container {
@@ -60,8 +60,8 @@
 				}
 
 				.query-rule-image-summary {
-					width: 0px;
 					font-size: 0;
+					width: 0;
 				}
 			}
 		}
