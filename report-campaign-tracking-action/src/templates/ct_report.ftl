@@ -50,9 +50,9 @@
 			${campaignTrackingActionTotal.getCount()}
 
 			<div class="pull-right">
-				<i class="icon-info" data-id="${campaignTrackingActionTotal.getCampaignTrackingActionId()}" style="display: block;padding: 0 1em;"></i>
+				<i class="icon-info" data-id="${campaignTrackingActionTotal.getCampaignTrackingActionTotalId()}" style="display: block;padding: 0 1em;"></i>
 
-				<div class="hide" id="<@portlet["namespace"] />userSegmentViews${campaignTrackingActionTotal.getCampaignTrackingActionId()}">
+				<div class="hide" id="<@portlet["namespace"] />userSegmentViews${campaignTrackingActionTotal.getCampaignTrackingActionTotalWCM-214Id()}">
 					<#list campaignTrackingActionTotal.getViewsByUserSegment() as campaignTrackingAction>
 						<p>${campaignTrackingAction.getUserSegmentName(locale)} - ${campaignTrackingAction.getCount()}</p>
 					</#list>
