@@ -15,28 +15,23 @@
 package com.liferay.content.targeting.portlet;
 
 import com.liferay.content.targeting.portlet.util.QueryRule;
-import com.liferay.content.targeting.portlet.util.UserSegmentQueryRule;
-import com.liferay.content.targeting.portlet.util.UserSegmentQueryRuleUtil;
-import com.liferay.content.targeting.util.ContentTargetingUtil;
-import com.liferay.content.targeting.util.UserSegmentUtil;
+import com.liferay.content.targeting.portlet.util.TestQueryRule;
+import com.liferay.content.targeting.portlet.util.TestQueryRuleUtil;
 import com.liferay.content.targeting.util.WebKeys;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.template.Template;
-import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
+
 import freemarker.ext.beans.BeansWrapper;
+
 import freemarker.template.TemplateHashModel;
 
 import java.util.ArrayList;
@@ -51,7 +46,16 @@ import javax.portlet.PortletResponse;
 /**
  * @author Eudaldo Alonso
  */
-public class ABTestingPortlet extends CTFreeMarkerPortlet {
+public class ABTestingPortlet extends CTFreeMarkerDisplayPortlet {
+
+	public void updatePreferences(
+			ActionRequest request, ActionResponse response)
+		throws Exception {
+
+		PortletPreferences portletPreferences = request.getPreferences();
+
+		super.updatePreferences(request, response, portletPreferences);
+	}
 
 	@Override
 	protected void doPopulateContext(
@@ -71,6 +75,27 @@ public class ABTestingPortlet extends CTFreeMarkerPortlet {
 			path, portletRequest, portletResponse, template, staticModels);
 	}
 
+	protected List<AssetRendererFactory> getSelectableAssetRendererFactories(
+		long companyId) {
+
+		List<AssetRendererFactory> selectableAssetRendererFactories =
+			new ArrayList<AssetRendererFactory>();
+
+		List<AssetRendererFactory> assetRendererFactories =
+			AssetRendererFactoryRegistryUtil.getAssetRendererFactories(
+				companyId);
+
+		for (AssetRendererFactory rendererFactory : assetRendererFactories) {
+			if (!rendererFactory.isSelectable()) {
+				continue;
+			}
+
+			selectableAssetRendererFactories.add(rendererFactory);
+		}
+
+		return selectableAssetRendererFactories;
+	}
+
 	protected void populateViewContext(
 			String path, PortletRequest portletRequest,
 			PortletResponse portletResponse, Template template,
@@ -82,15 +107,74 @@ public class ABTestingPortlet extends CTFreeMarkerPortlet {
 
 		PortletPreferences portletPreferences = portletRequest.getPreferences();
 
-		if (Validator.isNull(path) || path.equals(ABTestingPath.VIEW)) {
+		populatePortletDisplayTemplateContext(
+			template, portletPreferences, themeDisplay.getScopeGroupId(),
+			"full-content");
 
+		if (Validator.isNull(path) ||
+			path.equals(CampaignContentDisplayPath.VIEW)) {
+
+			template.put(
+				"isNotConfigured", portletPreferences.getMap().isEmpty());
+
+			template.put("showPreview", showPreview(themeDisplay));
+
+			List<QueryRule> testQueryRules =
+				TestQueryRuleUtil.getTestQueryRules(
+					portletPreferences, themeDisplay.getLocale(), false);
+
+			template.put("testQueryRules", testQueryRules);
+
+			QueryRule queryRule = TestQueryRuleUtil.match(testQueryRules);
+
+			template.put("queryRule", queryRule);
+
+			template.put("selectedIndex", testQueryRules.indexOf(queryRule));
+
+			List<AssetEntry> results = new ArrayList<AssetEntry>();
+
+			if ((queryRule != null) && (queryRule.getAssetEntry() != null)) {
+				results.add(queryRule.getAssetEntry());
+
+				queryRule.setAssetAttributes(portletRequest);
+			}
+			else {
+				portletRequest.setAttribute(
+					WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
+			}
+
+			template.put("liferayWindowStatePopUp", LiferayWindowState.POP_UP);
+
+			populatePortletDisplayTemplateViewContext(
+				template, portletRequest, themeDisplay, results,
+				testQueryRules);
 		}
-		else if (path.equals(ABTestingPath.CONFIGURATION)) {
+		else if (path.equals(CampaignContentDisplayPath.EDIT_QUERY_RULE) ||
+				 path.equals(CampaignContentDisplayPath.CONFIGURATION)) {
 
+			template.put(
+				"assetRendererFactories",
+				getSelectableAssetRendererFactories(
+					themeDisplay.getCompanyId()));
+
+			List<QueryRule> testQueryRules =
+				TestQueryRuleUtil.getTestQueryRules(
+					portletPreferences, themeDisplay.getLocale(), true);
+
+			template.put("testQueryRules", testQueryRules);
+
+			TestQueryRule testQueryRule =
+				(TestQueryRule)portletRequest.getAttribute(
+					"configuration.queryRule");
+
+			if (testQueryRule == null) {
+				testQueryRule = new TestQueryRule();
+			}
+
+			template.put("queryRule", testQueryRule);
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
-		ABTestingPortlet.class);
+	private static Log _log = LogFactoryUtil.getLog(ABTestingPortlet.class);
 
 }
