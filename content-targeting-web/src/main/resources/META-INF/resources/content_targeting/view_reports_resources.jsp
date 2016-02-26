@@ -104,7 +104,7 @@ SearchContainerIterator searchContainerIterator = new ReportSearchContainerItera
 			/>
 		</liferay-ui:search-container-row>
 
-		<liferay-ui:search-iterator />
+		<liferay-ui:search-iterator markupView="lexicon" />
 	</liferay-ui:search-container>
 </c:if>
 
