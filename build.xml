@@ -1,63 +1,93 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
 
-<project xmlns:antelope="antlib:ise.antelope.tasks">
+<project xmlns:antelope="antlib:ise.antelope.tasks" xmlns:sonar="antlib:org.sonar.ant">
 	<import file="../../build-common-plugins.xml" />
 
-	<property name="app.services" value="analytics-api,anonymous-users-api,content-targeting-api,report-campaign-content,report-campaign-tracking-action,report-user-segment-content,rule-score-points" />
+	<property file="sonar.${user.name}.properties" />
+	<property file="sonar.${env.COMPUTERNAME}.properties" />
+	<property file="sonar.${env.HOST}.properties" />
+	<property file="sonar.${env.HOSTNAME}.properties" />
+	<property file="sonar.properties" />
 
-	<path id="app.services.path">
-		<dirset dir="." includes="${app.services}" />
-	</path>
+	<macrodef name="consolidate-test">
+		<attribute name="module.dir" />
 
-	<pathconvert pathsep="," property="app.services.path" refid="app.services.path" targetos="unix" />
+		<sequential>
+			<copy todir="@{module.dir}/test-results" failonerror="false">
+				<fileset dir="@{module.dir}/test-results/integration" />
+				<fileset dir="@{module.dir}/test-results/unit" />
+			</copy>
 
-	<target name="build-app">
-		<antcall target="clean" />
+			<merge-coverage module.dir="@{module.dir}" />
+		</sequential>
+	</macrodef>
 
-		<antcall target="build-app-services" />
+	<target name="consolidate-tests">
+		<path id="app.core.path">
+			<dirset dir="${sdk.dir}/apps/content-targeting" excludes="*-test" includes="*" />
+		</path>
 
-		<loop-macrodef-or-target
-			module.dirs="${plugins.includes.path}"
-			target.name="compile-import-shared"
-		/>
+		<pathconvert pathsep="," property="app.core.path" refid="app.core.path" targetos="unix" />
 
-		<antcall target="deploy" />
+		<loop-macrodef-or-target module.dirs="${app.core.path}" target.name="consolidate-test" />
 	</target>
 
-	<target name="build-app-services">
-		<loop-macrodef-or-target
-			module.dirs="${app.services.path}"
-			target.name="build-app-service"
+	<target name="create-channel">
+		<if>
+			<or>
+				<not>
+					<isset property="channel.display.name" />
+				</not>
+				<not>
+					<isset property="channel.name" />
+				</not>
+			</or>
+			<then>
+				<fail>This task must be called by the create_channel script.</fail>
+			</then>
+		</if>
+
+		<property name="channel.parent.dir" value="${user.dir}" />
+		<property name="channel.dir" value="${channel.parent.dir}/channel-${channel.name}" />
+
+		<if>
+			<available file="${channel.dir}" />
+			<then>
+				<fail>${channel.dir} already exists.</fail>
+			</then>
+		</if>
+
+		<copy todir="${channel.dir}">
+			<fileset dir="${user.dir}/tools/channel_tmpl" />
+		</copy>
+
+		<antelope:stringutil string="${channel.display.name}" property="channel.java.class.name">
+			<antelope:replace regex="\s+" replacement="" />
+			<antelope:trim/>
+		</antelope:stringutil>
+
+		<antelope:stringutil string="${channel.name}" property="channel.java.package.dir">
+			<antelope:replace regex="-" replacement="/" />
+			<antelope:trim/>
+		</antelope:stringutil>
+
+		<antelope:stringutil string="${channel.name}" property="channel.java.package.name">
+			<antelope:replace regex="-" replacement="." />
+			<antelope:trim/>
+		</antelope:stringutil>
+
+		<move
+			file="${channel.dir}/src/com/liferay/content/targeting/channel/Channel.java"
+			tofile="${channel.dir}/src/com/liferay/content/targeting/channel/${channel.java.package.dir}/${channel.java.class.name}Channel.java"
 		/>
-	</target>
 
-	<target name="build-lang">
-		<loop-macrodef-or-target
-			module.dirs="${plugins.includes.path}"
-			target.name="build-lang"
-		/>
-	</target>
-
-	<property name="app.tests" value="*-test,runtime-test-dependencies" />
-
-	<path id="app.tests.path">
-		<dirset dir="." includes="${app.tests}" />
-	</path>
-
-	<pathconvert pathsep="," property="app.tests.path" refid="app.tests.path" targetos="unix" />
-
-	<target name="build-tests">
-		<loop-macrodef-or-target
-			module.dirs="${app.tests.path}"
-			target.name="deploy"
-		/>
-	</target>
-
-	<target name="clean-osgi-data">
-		<delete dir="${app.server.parent.dir}/data/osgi" />
-		<delete dir="${app.server.dir}/work" />
-		<delete dir="${app.server.dir}/temp" />
+		<replace dir="${channel.dir}">
+			<replacefilter token="@channel.display.name@" value="${channel.display.name}" />
+			<replacefilter token="@channel.java.class.name@" value="${channel.java.class.name}" />
+			<replacefilter token="@channel.java.package.name@" value="${channel.java.package.name}" />
+			<replacefilter token="@channel.name@" value="${channel.name}" />
+		</replace>
 	</target>
 
 	<target name="create-report">
@@ -86,25 +116,25 @@
 		</if>
 
 		<copy todir="${report.dir}">
-			<fileset
-				dir="${user.dir}/tools/report_tmpl"
-			/>
+			<fileset dir="${user.dir}/tools/report_tmpl" />
 		</copy>
 
 		<antelope:stringutil string="${report.display.name}" property="report.java.class.name">
 			<antelope:replace regex="\s+" replacement="" />
-			<antelope:trim />
+			<antelope:trim/>
+		</antelope:stringutil>
+
+		<antelope:stringutil string="${report.name}" property="report.java.package.dir">
+			<antelope:replace regex="-" replacement="/" />
+			<antelope:trim/>
 		</antelope:stringutil>
 
 		<antelope:stringutil string="${report.name}" property="report.java.package.name">
-			<antelope:replace regex="-" replacement="" />
-			<antelope:trim />
+			<antelope:replace regex="-" replacement="." />
+			<antelope:trim/>
 		</antelope:stringutil>
 
-		<move
-			file="${report.dir}/src/com/liferay/content/targeting/report/Report.java"
-			tofile="${report.dir}/src/com/liferay/content/targeting/report/${report.java.package.name}/${report.java.class.name}Report.java"
-		/>
+		<move file="${report.dir}/src/com/liferay/content/targeting/report/Report.java" tofile="${report.dir}/src/com/liferay/content/targeting/report/${report.java.package.dir}/${report.java.class.name}Report.java" />
 
 		<replace dir="${report.dir}">
 			<replacefilter token="@report.display.name@" value="${report.display.name}" />
@@ -140,25 +170,25 @@
 		</if>
 
 		<copy todir="${rule.dir}">
-			<fileset
-				dir="${user.dir}/tools/rule_tmpl"
-			/>
+			<fileset dir="${user.dir}/tools/rule_tmpl" />
 		</copy>
 
 		<antelope:stringutil string="${rule.display.name}" property="rule.java.class.name">
 			<antelope:replace regex="\s+" replacement="" />
-			<antelope:trim />
+			<antelope:trim/>
+		</antelope:stringutil>
+
+		<antelope:stringutil string="${rule.name}" property="rule.java.package.dir">
+			<antelope:replace regex="-" replacement="/" />
+			<antelope:trim/>
 		</antelope:stringutil>
 
 		<antelope:stringutil string="${rule.name}" property="rule.java.package.name">
-			<antelope:replace regex="-" replacement="" />
-			<antelope:trim />
+			<antelope:replace regex="-" replacement="." />
+			<antelope:trim/>
 		</antelope:stringutil>
 
-		<move
-			file="${rule.dir}/src/com/liferay/content/targeting/rule/Rule.java"
-			tofile="${rule.dir}/src/com/liferay/content/targeting/rule/${rule.java.package.name}/${rule.java.class.name}Rule.java"
-		/>
+		<move file="${rule.dir}/src/com/liferay/content/targeting/rule/Rule.java" tofile="${rule.dir}/src/com/liferay/content/targeting/rule/${rule.java.package.dir}/${rule.java.class.name}Rule.java" />
 
 		<replace dir="${rule.dir}">
 			<replacefilter token="@rule.display.name@" value="${rule.display.name}" />
@@ -194,24 +224,27 @@
 		</if>
 
 		<copy todir="${tracking.action.dir}">
-			<fileset
-				dir="${user.dir}/tools/tracking_action_tmpl"
-			/>
+			<fileset dir="${user.dir}/tools/tracking_action_tmpl" />
 		</copy>
 
 		<antelope:stringutil string="${tracking.action.display.name}" property="tracking.action.java.class.name">
 			<antelope:replace regex="\s+" replacement="" />
-			<antelope:trim />
+			<antelope:trim/>
+		</antelope:stringutil>
+
+		<antelope:stringutil string="${tracking.action.name}" property="tracking.action.java.package.dir">
+			<antelope:replace regex="-" replacement="/" />
+			<antelope:trim/>
 		</antelope:stringutil>
 
 		<antelope:stringutil string="${tracking.action.name}" property="tracking.action.java.package.name">
-			<antelope:replace regex="-" replacement="" />
-			<antelope:trim />
+			<antelope:replace regex="-" replacement="." />
+			<antelope:trim/>
 		</antelope:stringutil>
 
 		<move
 			file="${tracking.action.dir}/src/com/liferay/content/targeting/tracking/action/TrackingAction.java"
-			tofile="${tracking.action.dir}/src/com/liferay/content/targeting/tracking/action/${tracking.action.java.package.name}/${tracking.action.java.class.name}TrackingAction.java"
+			tofile="${tracking.action.dir}/src/com/liferay/content/targeting/tracking/action/${tracking.action.java.package.dir}/${tracking.action.java.class.name}TrackingAction.java"
 		/>
 
 		<replace dir="${tracking.action.dir}">
@@ -222,57 +255,11 @@
 		</replace>
 	</target>
 
-	<target name="release">
-		<if>
-			<not>
-				<isset property="release.version" />
-			</not>
-			<then>
-				<tstamp>
-					<format property="release.version" pattern="EEE-d-MMM-yyyy-HH-mm-ss" />
-				</tstamp>
-			</then>
-		</if>
+	<target name="sonar">
+		<taskdef resource="org/sonar/ant/antlib.xml" uri="antlib:org.sonar.ant">
+			<classpath path="${sdk.dir}/dependencies/org.sonar.ant/lib/sonar-ant-task.jar" />
+		</taskdef>
 
-		<delete dir="${sdk.dir}/dist" failonerror="false" />
-		<delete file="${sdk.dir}/content-targeting-release-${release.version}.zip" failonerror="false" />
-
-		<mkdir dir="${sdk.dir}/content-targeting-dist" />
-
-		<var name="auto.deploy.dir.default" value="${auto.deploy.dir}" />
-		<var name="auto.deploy.dir" value="${sdk.dir}/content-targeting-dist" />
-
-		<antcall target="build-app" />
-
-		<zip
-			basedir="${auto.deploy.dir}"
-			destfile="${sdk.dir}/content-targeting-release-${release.version}.zip"
-		/>
-
-		<copy todir="${auto.deploy.dir.default}">
-			<fileset dir="${auto.deploy.dir}" />
-		</copy>
-
-		<delete dir="${auto.deploy.dir}" failonerror="false" />
+		<sonar:sonar/>
 	</target>
-
-	<macrodef name="build-app-service">
-		<attribute name="module.dir" />
-
-		<sequential>
-			<process-ivy module.dir="@{module.dir}" />
-
-			<compile-import-shared module.dir="@{module.dir}" />
-
-			<ant dir="@{module.dir}" target="build-service" inheritAll="false" />
-		</sequential>
-	</macrodef>
-
-	<macrodef name="build-lang">
-		<attribute name="module.dir" />
-
-		<sequential>
-			<ant dir="@{module.dir}" target="build-lang" inheritAll="false" />
-		</sequential>
-	</macrodef>
 </project>

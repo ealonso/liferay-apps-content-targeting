@@ -3,6 +3,57 @@
 
 <service-builder package-path="com.liferay.content.targeting">
 	<namespace>CT</namespace>
+	<entity name="AnonymousUserUserSegment" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="anonymousUserUserSegmentId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="anonymousUserId" type="long" />
+		<column name="userSegmentId" type="long" />
+		<column name="manual" type="boolean" />
+		<column name="active" type="boolean" />
+
+		<order by="desc">
+			<order-column name="modifiedDate" />
+			<order-column name="active" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="A_U" return-type="Collection">
+			<finder-column name="anonymousUserId" />
+			<finder-column name="userSegmentId" />
+		</finder>
+
+		<finder name="AnonymousUserId" return-type="Collection">
+			<finder-column name="anonymousUserId" />
+			<finder-column name="active" />
+		</finder>
+
+		<finder name="UserSegmentIds" return-type="Collection">
+			<finder-column name="userSegmentId" arrayable-operator="OR" />
+			<finder-column name="active" />
+		</finder>
+
+		<finder name="C_LtD_M" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="modifiedDate" comparator="&lt;" />
+			<finder-column name="manual" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Company" />
+		<reference package-path="com.liferay.portal" entity="SystemEvent" />
+	</entity>
 	<entity name="Campaign" uuid="true" local-service="true" remote-service="true">
 
 		<!-- PK fields -->
@@ -27,6 +78,7 @@
 		<column name="description" type="String" localized="true" />
 		<column name="startDate" type="Date" />
 		<column name="endDate" type="Date" />
+		<column name="timeZoneId" type="String" />
 		<column name="priority" type="int" />
 		<column name="active" type="boolean" />
 
@@ -48,9 +100,73 @@
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="Group" />
 		<reference package-path="com.liferay.portal" entity="SystemEvent" />
 	</entity>
-	<entity name="ReportInstance" local-service="true" remote-service="true">
+	<entity name="ChannelInstance" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="channelInstanceId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="channelKey" type="String" />
+		<column name="campaignId" type="long" />
+		<column name="tacticId" type="long" />
+		<column name="alias" type="String" />
+		<column name="typeSettings" type="String" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="channelKey" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="ChannelKey" return-type="Collection">
+			<finder-column name="channelKey" />
+		</finder>
+		<finder name="CampaignId" return-type="Collection">
+			<finder-column name="campaignId" />
+		</finder>
+		<finder name="TacticId" return-type="Collection">
+			<finder-column name="tacticId" />
+		</finder>
+		<finder name="C_K" return-type="Collection">
+			<finder-column name="campaignId" />
+			<finder-column name="channelKey" />
+		</finder>
+		<finder name="T_K" return-type="Collection">
+			<finder-column name="tacticId" />
+			<finder-column name="channelKey" />
+		</finder>
+		<finder name="T_A" return-type="ChannelInstance" unique="true">
+			<finder-column name="tacticId" />
+			<finder-column name="alias" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="SystemEvent" />
+	</entity>
+	<entity name="ReportInstance" uuid="true" local-service="true" remote-service="true">
 
 		<!-- PK fields -->
 
@@ -65,11 +181,14 @@
 		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
 		<column name="modifiedDate" type="Date" />
 
 		<!-- Other fields -->
 
 		<column name="reportKey" type="String" />
+		<column name="name" type="String" localized="true" />
+		<column name="description" type="String" localized="true" />
 		<column name="className" type="String" />
 		<column name="classPK" type="long" />
 		<column name="typeSettings" type="String" />
@@ -86,11 +205,13 @@
 			<finder-column name="className" />
 			<finder-column name="classPK" />
 		</finder>
-		<finder name="R_C_C" return-type="ReportInstance" unique="true">
+		<finder name="R_C_C" return-type="Collection">
 			<finder-column name="reportKey" />
 			<finder-column name="className" />
 			<finder-column name="classPK" />
 		</finder>
+
+		<reference package-path="com.liferay.portal" entity="Group" />
 	</entity>
 	<entity name="RuleInstance" uuid="true" local-service="true" remote-service="true">
 
@@ -139,6 +260,48 @@
 
 		<reference package-path="com.liferay.portal" entity="SystemEvent" />
 	</entity>
+	<entity name="Tactic" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="tacticId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="campaignId" type="long" />
+		<column name="name" type="String" localized="true" />
+		<column name="description" type="String" localized="true" />
+
+		<!-- Relationships -->
+
+		<column name="userSegments" type="Collection" entity="UserSegment" mapping-table="Tactics_UserSegments" />
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CampaignId" return-type="Collection">
+			<finder-column name="campaignId" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="SystemEvent" />
+	</entity>
 	<entity name="TrackingActionInstance" uuid="true" local-service="true" remote-service="true">
 
 		<!-- PK fields -->
@@ -161,6 +324,7 @@
 
 		<column name="trackingActionKey" type="String" />
 		<column name="campaignId" type="long" />
+		<column name="reportInstanceId" type="long" />
 		<column name="alias" type="String" />
 		<column name="referrerClassName" type="String" />
 		<column name="referrerClassPK" type="long" />
@@ -182,13 +346,35 @@
 		<finder name="CampaignId" return-type="Collection">
 			<finder-column name="campaignId" />
 		</finder>
+		<finder name="ReportInstanceId" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+		</finder>
+		<finder name="C_A" return-type="TrackingAction" unique="true">
+			<finder-column name="campaignId" />
+			<finder-column name="alias" />
+		</finder>
+		<finder name="R_A" return-type="TrackingAction" unique="true">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="alias" />
+		</finder>
 		<finder name="C_E_E" return-type="Collection">
 			<finder-column name="campaignId" />
 			<finder-column name="elementId" />
 			<finder-column name="eventType" />
 		</finder>
+		<finder name="R_E_E" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="elementId" />
+			<finder-column name="eventType" />
+		</finder>
 		<finder name="C_R_R_E" return-type="Collection">
 			<finder-column name="campaignId" />
+			<finder-column name="referrerClassName" />
+			<finder-column name="referrerClassPK" />
+			<finder-column name="eventType" />
+		</finder>
+		<finder name="R_R_R_E" return-type="Collection">
+			<finder-column name="reportInstanceId" />
 			<finder-column name="referrerClassName" />
 			<finder-column name="referrerClassPK" />
 			<finder-column name="eventType" />
@@ -225,33 +411,43 @@
 		<!-- Relationships -->
 
 		<column name="campaigns" type="Collection" entity="Campaign" mapping-table="Campaigns_UserSegments" />
+		<column name="tactics" type="Collection" entity="Tactic" mapping-table="Tactics_UserSegments" />
 
 		<!-- Order -->
 
 		<order by="desc">
-			<order-column name="name" />
+			<order-column name="modifiedDate" />
 		</order>
 
 		<!-- Finder methods -->
 
-		<finder name="AssetCategoryId" return-type="UserSegment">
-			<finder-column name="assetCategoryId" />
-		</finder>
 		<finder name="GroupId" return-type="Collection">
 			<finder-column name="groupId" arrayable-operator="OR" />
+		</finder>
+		<finder name="AssetCategoryId" return-type="UserSegment">
+			<finder-column name="assetCategoryId" />
 		</finder>
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="Group" />
 		<reference package-path="com.liferay.portal" entity="SystemEvent" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetCategory" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetVocabulary" />
 	</entity>
 	<exceptions>
-		<exception>UsedUserSegment</exception>
+		<exception>DuplicateChannelInstance</exception>
+		<exception>DuplicateReportInstance</exception>
+		<exception>DuplicateTrackingActionInstance</exception>
+		<exception>InvalidChannel</exception>
+		<exception>InvalidChannels</exception>
 		<exception>InvalidDateRange</exception>
 		<exception>InvalidName</exception>
+		<exception>InvalidReport</exception>
 		<exception>InvalidRule</exception>
 		<exception>InvalidRules</exception>
 		<exception>InvalidTrackingAction</exception>
 		<exception>InvalidTrackingActions</exception>
+		<exception>UsedUserSegment</exception>
 	</exceptions>
 </service-builder>

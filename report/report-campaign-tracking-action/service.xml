@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.0.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_0_0.dtd">
+
+<service-builder package-path="com.liferay.content.targeting.report.campaign.tracking.action">
+	<namespace>CT_CTA</namespace>
+	<entity name="CTAction" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="CTActionId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="campaignId" type="long" />
+		<column name="reportInstanceId" type="long" />
+		<column name="userSegmentId" type="long" />
+		<column name="alias" type="String" />
+		<column name="referrerClassName" type="String" />
+		<column name="referrerClassPK" type="long" />
+		<column name="elementId" type="String" />
+		<column name="eventType" type="String" />
+		<column name="count" type="int" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="modifiedDate" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="CampaignId" return-type="Collection">
+			<finder-column name="campaignId" />
+		</finder>
+
+		<finder name="ReportInstanceId" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+		</finder>
+
+		<finder name="R_E" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="elementId" />
+		</finder>
+
+		<finder name="R_GtD" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="modifiedDate" comparator="&gt;" />
+		</finder>
+
+		<finder name="R_R_R" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="referrerClassName" />
+			<finder-column name="referrerClassPK" />
+		</finder>
+
+		<finder name="R_U_R_R_E_E" return-type="CTAction" unique="true">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="userSegmentId" />
+			<finder-column name="referrerClassName" />
+			<finder-column name="referrerClassPK" />
+			<finder-column name="elementId" />
+			<finder-column name="eventType" />
+		</finder>
+
+	</entity>
+
+	<entity name="CTActionTotal" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="CTActionTotalId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="campaignId" type="long" />
+		<column name="reportInstanceId" type="long" />
+		<column name="alias" type="String" />
+		<column name="referrerClassName" type="String" />
+		<column name="referrerClassPK" type="long" />
+		<column name="elementId" type="String" />
+		<column name="eventType" type="String" />
+		<column name="count" type="int" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="modifiedDate" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="CampaignId" return-type="Collection">
+			<finder-column name="campaignId" />
+		</finder>
+
+		<finder name="ReportInstanceId" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+		</finder>
+
+		<finder name="R_GtD" return-type="Collection">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="modifiedDate" comparator="&gt;" />
+		</finder>
+
+		<finder name="R_R_R_E_E" return-type="CTAction" unique="true">
+			<finder-column name="reportInstanceId" />
+			<finder-column name="referrerClassName" />
+			<finder-column name="referrerClassPK" />
+			<finder-column name="elementId" />
+			<finder-column name="eventType" />
+		</finder>
+
+	</entity>
+</service-builder>
